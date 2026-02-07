@@ -4,9 +4,16 @@
 
 Build a CLI script from scratch in `/home/calvin/projects/upscaler` that uses Real-ESRGAN to perform super-resolution upscaling on images. The script accepts a single image or a folder of images and outputs the upscaled results. Scale factor is configurable (2x, 4x).
 
-## Files to Create
+## Implementation Steps
 
-### 1. `requirements.txt`
+### Step 1: Set up virtual environment with `uv` ✅
+
+```bash
+uv venv  # creates .venv/ using CPython 3.12.3
+source .venv/bin/activate
+```
+
+### Step 2: Create `requirements.txt`
 
 ```
 realesrgan
@@ -21,7 +28,13 @@ numpy
 tqdm
 ```
 
-### 2. `upscale.py` — Main CLI Script
+### Step 3: Install dependencies with `uv`
+
+```bash
+uv pip install -r requirements.txt
+```
+
+### Step 4: Create `upscale.py` — Main CLI Script
 
 A single-file Python script using `argparse` with the following interface:
 
@@ -71,7 +84,7 @@ python upscale.py -i <input> -o <output> [--scale 4] [--model general] [--face-e
 
 ## Verification
 
-1. Install dependencies: `pip install -r requirements.txt`
+1. Activate venv: `source .venv/bin/activate`
 2. Test single image: `python upscale.py -i test.jpg -o test_upscaled.jpg --scale 4`
 3. Test folder: `python upscale.py -i ./input_images -o ./output_images --scale 2`
 4. Test face enhance: `python upscale.py -i portrait.jpg -o portrait_up.png --face-enhance`
