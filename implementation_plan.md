@@ -55,7 +55,7 @@ python upscale.py -i <input> -o <output> [--scale 4] [--model general] [--face-e
 | `--suffix` | Suffix appended to output filenames (e.g., `_upscaled`) | `_upscaled` |
 | `--format` | Output format: `auto`, `png`, `jpg` | `auto` (same as input) |
 
-### Step 5: Model selection and initialization
+### Step 5: Model selection and initialization ✅
 
 Add model loading logic to `upscale.py`:
 

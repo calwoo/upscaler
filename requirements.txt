@@ -1,0 +1,11 @@
+realesrgan
+basicsr
+gfpgan
+facexlib
+opencv-python
+Pillow
+torch
+torchvision
+numpy
+tqdm
+pytest
