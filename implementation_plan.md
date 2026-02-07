@@ -13,7 +13,7 @@ uv venv  # creates .venv/ using CPython 3.12.3
 source .venv/bin/activate
 ```
 
-### Step 2: Create `requirements.txt`
+### Step 2: Create `requirements.txt` ✅
 
 ```
 realesrgan
@@ -28,7 +28,7 @@ numpy
 tqdm
 ```
 
-### Step 3: Install dependencies with `uv`
+### Step 3: Install dependencies with `uv` ✅
 
 ```bash
 uv pip install -r requirements.txt
