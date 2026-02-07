@@ -34,7 +34,7 @@ tqdm
 uv pip install -r requirements.txt
 ```
 
-### Step 4: CLI skeleton with argparse
+### Step 4: CLI skeleton with argparse ✅
 
 Create `upscale.py` with argument parsing and input validation only (no model logic yet). Script should parse args, validate that input path exists, and print the parsed configuration.
 
