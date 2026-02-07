@@ -5,6 +5,7 @@ import argparse
 import sys
 from pathlib import Path
 
+import cv2
 import torch
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
@@ -172,9 +173,35 @@ def main():
     upsampler, face_enhancer = setup_model(args)
 
     pairs = resolve_paths(args)
-    print(f"Found {len(pairs)} image(s) to process")
-    for inp, out in pairs:
-        print(f"  {inp} -> {out}")
+    print(f"Found {len(pairs)} image(s) to process\n")
+
+    success = 0
+    failed = 0
+    for i, (inp, out) in enumerate(pairs, 1):
+        try:
+            img = cv2.imread(str(inp), cv2.IMREAD_UNCHANGED)
+            if img is None:
+                raise ValueError(f"Failed to read image: {inp}")
+
+            h, w = img.shape[:2]
+            print(f"[{i}/{len(pairs)}] {inp.name} ({w}x{h}) -> ", end="", flush=True)
+
+            if face_enhancer:
+                _, _, output = face_enhancer.enhance(
+                    img, has_aligned=False, only_center_face=False, paste_back=True,
+                )
+            else:
+                output, _ = upsampler.enhance(img, outscale=args.scale)
+
+            cv2.imwrite(str(out), output)
+            oh, ow = output.shape[:2]
+            print(f"{out.name} ({ow}x{oh})")
+            success += 1
+        except Exception as e:
+            print(f"ERROR: {e}")
+            failed += 1
+
+    print(f"\nDone: {success} succeeded, {failed} failed")
 
 
 if __name__ == "__main__":

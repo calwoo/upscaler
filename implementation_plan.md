@@ -82,7 +82,7 @@ Add path handling logic:
 - If input is a directory → output is treated as a directory (create if needed), collect all image files (`*.png, *.jpg, *.jpeg, *.webp, *.bmp, *.tiff`)
 - Apply `--suffix` and `--format` when building output filenames
 
-### Step 7: Image processing loop
+### Step 7: Image processing loop ✅
 
 Add the core processing logic:
 
