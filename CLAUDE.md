@@ -10,4 +10,5 @@ Follow the plan in `implementation_plan.md`. The active working plan is also tra
 - **Write docs**: Write documentation to the `docs/` folder in the project as you go.
 - **Test after every step**: Run relevant tests from the test plan after completing each step to verify correctness before moving on.
 - **Commit after every step**: Make a git commit after each implementation step is completed.
+- **Staging files**: Prefer `git add .` when staging files for commits.
 - **Virtual environment**: Use `uv` for venv setup and dependency installation (not pip/venv).
