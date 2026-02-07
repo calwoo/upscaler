@@ -92,7 +92,7 @@ Add the core processing logic:
 - Print progress with image name and dimensions
 - Wrap each image in try/except, print errors but continue processing remaining images
 
-### Step 8: Write usage documentation
+### Step 8: Write usage documentation ✅
 
 Write `docs/usage.md` covering CLI arguments, examples, and model descriptions.
 
