@@ -34,9 +34,9 @@ tqdm
 uv pip install -r requirements.txt
 ```
 
-### Step 4: Create `upscale.py` — Main CLI Script
+### Step 4: CLI skeleton with argparse
 
-A single-file Python script using `argparse` with the following interface:
+Create `upscale.py` with argument parsing and input validation only (no model logic yet). Script should parse args, validate that input path exists, and print the parsed configuration.
 
 ```
 python upscale.py -i <input> -o <output> [--scale 4] [--model general] [--face-enhance] [--tile 400] [--gpu-id 0]
@@ -55,37 +55,80 @@ python upscale.py -i <input> -o <output> [--scale 4] [--model general] [--face-e
 | `--suffix` | Suffix appended to output filenames (e.g., `_upscaled`) | `_upscaled` |
 | `--format` | Output format: `auto`, `png`, `jpg` | `auto` (same as input) |
 
-**Implementation logic:**
+### Step 5: Model selection and initialization
 
-1. **Parse args** with `argparse`
-2. **Select model** based on `--scale` and `--model`:
-   - `general` + 4x → `RealESRGAN_x4plus` with `RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)`
-   - `general` + 2x → `RealESRGAN_x2plus` with `RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)`
-   - `anime` + 4x → `RealESRGAN_x4plus_anime_6B` with `RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)`
-3. **Initialize `RealESRGANer`** with auto GPU/CPU detection:
-   - `device = 'cuda' if torch.cuda.is_available() else 'cpu'`
-   - `half = True` only when on CUDA
-   - Model weights auto-download from GitHub releases via URL
-4. **Optionally init GFPGAN** if `--face-enhance` is set, using the RealESRGAN upsampler as background upsampler
-5. **Resolve input/output paths:**
-   - If input is a file → output is treated as a file path (create parent dirs)
-   - If input is a directory → output is treated as a directory (create if needed), process all image files (`*.png, *.jpg, *.jpeg, *.webp, *.bmp, *.tiff`)
-6. **Process each image:**
-   - Read with `cv2.imread` (handles alpha channel via `cv2.IMREAD_UNCHANGED`)
-   - Call `upsampler.enhance(img, outscale=scale)` (or `restorer.enhance()` if face-enhance)
-   - Save with `cv2.imwrite` to output path
-   - Print progress with image name and dimensions
-7. **Error handling:** Wrap each image in try/except, print errors but continue processing remaining images
+Add model loading logic to `upscale.py`:
+
+- **Select model** based on `--scale` and `--model`:
+  - `general` + 4x → `RealESRGAN_x4plus` with `RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)`
+  - `general` + 2x → `RealESRGAN_x2plus` with `RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)`
+  - `anime` + 4x → `RealESRGAN_x4plus_anime_6B` with `RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)`
+- **Initialize `RealESRGANer`** with auto GPU/CPU detection:
+  - `device = 'cuda' if torch.cuda.is_available() else 'cpu'`
+  - `half = True` only when on CUDA
+  - Model weights auto-download from GitHub releases via URL
+- **Optionally init GFPGAN** if `--face-enhance` is set, using the RealESRGAN upsampler as background upsampler
 
 **Model weight URLs** (auto-download pattern used by Real-ESRGAN):
 - `https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth`
 - `https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth`
 - `https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth`
 
-## Verification
+### Step 6: Input/output path resolution
 
-1. Activate venv: `source .venv/bin/activate`
-2. Test single image: `python upscale.py -i test.jpg -o test_upscaled.jpg --scale 4`
-3. Test folder: `python upscale.py -i ./input_images -o ./output_images --scale 2`
-4. Test face enhance: `python upscale.py -i portrait.jpg -o portrait_up.png --face-enhance`
-5. Verify output images exist and have expected dimensions (input dims * scale factor)
+Add path handling logic:
+
+- If input is a file → output is treated as a file path (create parent dirs)
+- If input is a directory → output is treated as a directory (create if needed), collect all image files (`*.png, *.jpg, *.jpeg, *.webp, *.bmp, *.tiff`)
+- Apply `--suffix` and `--format` when building output filenames
+
+### Step 7: Image processing loop
+
+Add the core processing logic:
+
+- Read each image with `cv2.imread` (handle alpha channel via `cv2.IMREAD_UNCHANGED`)
+- Call `upsampler.enhance(img, outscale=scale)` (or `restorer.enhance()` if face-enhance)
+- Save with `cv2.imwrite` to output path
+- Print progress with image name and dimensions
+- Wrap each image in try/except, print errors but continue processing remaining images
+
+### Step 8: Write usage documentation
+
+Write `docs/usage.md` covering CLI arguments, examples, and model descriptions.
+
+## Test Plan
+
+### Test 1: CLI argument parsing
+- Run `python upscale.py --help` and verify all arguments are listed
+- Run without required args, verify it exits with an error
+- Run with invalid `--scale` value (e.g. 3), verify it rejects it
+
+### Test 2: Single image upscale (4x general)
+- Create a small test image (e.g. 64x64 solid color PNG)
+- Run `python upscale.py -i test.png -o output.png --scale 4`
+- Verify output exists and dimensions are 256x256
+
+### Test 3: Single image upscale (2x general)
+- Run `python upscale.py -i test.png -o output_2x.png --scale 2`
+- Verify output dimensions are 128x128
+
+### Test 4: Folder batch processing
+- Create a folder with 2-3 small test images
+- Run `python upscale.py -i ./test_images -o ./test_output --scale 4`
+- Verify all images are upscaled in the output folder
+
+### Test 5: Output format conversion
+- Run with `--format jpg` on a PNG input
+- Verify output is saved as `.jpg`
+
+### Test 6: Suffix option
+- Run with `--suffix _4x`
+- Verify output filename includes the suffix
+
+### Test 7: Face enhancement
+- Run with `--face-enhance` on a portrait image
+- Verify GFPGAN is invoked and output is produced
+
+### Test 8: Error handling
+- Run with a non-existent input path, verify graceful error
+- Place a corrupt/non-image file in a batch folder, verify it skips and continues
