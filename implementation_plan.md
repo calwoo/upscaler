@@ -74,7 +74,7 @@ Add model loading logic to `upscale.py`:
 - `https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth`
 - `https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth`
 
-### Step 6: Input/output path resolution
+### Step 6: Input/output path resolution ✅
 
 Add path handling logic:
 
