@@ -10,6 +10,8 @@ import torch
 from basicsr.archs.rrdbnet_arch import RRDBNet
 from realesrgan import RealESRGANer
 
+from models import fetch_model_weights
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Upscale images using Real-ESRGAN")
@@ -99,9 +101,10 @@ def setup_model(args):
             f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu"
         )
 
+    cached_weights = fetch_model_weights(url)
     upsampler = RealESRGANer(
         scale=netscale,
-        model_path=url,
+        model_path=cached_weights,
         model=model,
         tile=args.tile,
         tile_pad=10,
@@ -114,8 +117,10 @@ def setup_model(args):
     if args.face_enhance:
         from gfpgan import GFPGANer
 
+        weights_url = "https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth"
+        cached_weights = fetch_model_weights(weights_url)
         face_enhancer = GFPGANer(
-            model_path="https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth",
+            model_path=cached_weights,
             upscale=args.scale,
             arch="clean",
             channel_multiplier=2,
