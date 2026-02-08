@@ -22,6 +22,7 @@ python upscale.py -i ./input_images -o ./output_images
 | `--scale` | Upscale factor: `2` or `4` | `4` |
 | `--model` | Model: `general` or `anime` | `general` |
 | `--face-enhance` | Enable GFPGAN face enhancement | off |
+| `--denoise` | Enable Swin2SR denoising before upscaling | off |
 | `--tile` | Tile size for large images (0 = no tiling) | `0` |
 | `--gpu-id` | GPU device ID (omit for auto-detect) | auto |
 | `--suffix` | Suffix for output filenames in folder mode | `_upscaled` |
@@ -79,6 +80,22 @@ Force output to JPEG regardless of input format:
 ```bash
 python upscale.py -i photo.png -o photo_out.jpg --format jpg
 ```
+
+### Denoising before upscaling
+
+Cleans noisy or compressed images before super-resolution using a Swin2SR model. This prevents noise from being amplified during upscaling:
+
+```bash
+python upscale.py -i noisy_photo.jpg -o clean_4x.png --denoise
+```
+
+Can be combined with other flags:
+
+```bash
+python upscale.py -i ./noisy_photos/ -o ./clean_upscaled/ --denoise --scale 2
+```
+
+The Swin2SR model weights are downloaded automatically from HuggingFace on first use.
 
 ### Tiling for large images
 

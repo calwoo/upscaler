@@ -39,12 +39,12 @@ Change `setup_model()` to return `(upsampler, face_enhancer, device)` so the den
 
 Add `transformers` (for model loading) and `huggingface_hub` (transitive dep, but explicit is better).
 
-### Step 5: Update tests
+### Step 5: Update tests ✅
 
 - Update `test_cli.py` to check `--denoise` flag appears in `--help` output
 - Add a unit test for the `DnCNN` / denoiser setup path validation
 
-### Step 6: Update docs
+### Step 6: Update docs ✅
 
 - Update `docs/usage.md` with `--denoise` flag documentation
 

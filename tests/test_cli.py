@@ -36,6 +36,7 @@ class TestHelpOutput:
             "--gpu-id",
             "--suffix",
             "--format",
+            "--denoise",
         ]:
             assert flag in result.stdout, f"Missing {flag} in --help output"
 
@@ -98,6 +99,20 @@ class TestFormatValidation:
     def test_valid_format_auto(self):
         result = run_cli("-i", "x", "-o", "y", "--format", "auto")
         assert "invalid choice" not in result.stderr.lower()
+
+
+class TestDenoiseFlag:
+    def test_denoise_flag_accepted(self):
+        """--denoise should be accepted without causing an argument error."""
+        result = run_cli("-i", "x", "-o", "y", "--denoise")
+        assert "unrecognized arguments" not in result.stderr.lower()
+
+    def test_denoise_module_importable(self):
+        """The denoise module should be importable and expose expected functions."""
+        from src.denoise import denoise_image, setup_denoiser
+
+        assert callable(setup_denoiser)
+        assert callable(denoise_image)
 
 
 class TestInputPathValidation:
