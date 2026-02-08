@@ -82,4 +82,3 @@ def setup_model(args):
         print("Face enhancement: enabled")
 
     return upsampler, face_enhancer
-–
