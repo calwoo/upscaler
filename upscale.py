@@ -55,6 +55,11 @@ def parse_args():
         choices=["auto", "png", "jpg"],
         help="Output format: auto, png, or jpg (default: auto)",
     )
+    parser.add_argument(
+        "--denoise",
+        action="store_true",
+        help="Enable Swin2SR denoising before upscaling",
+    )
     return parser.parse_args()
 
 
@@ -70,12 +75,19 @@ def main():
     print(f"Output:       {args.output}")
     print(f"Scale:        {args.scale}x")
     print(f"Face enhance: {args.face_enhance}")
+    print(f"Denoise:      {args.denoise}")
     print(f"Tile size:    {args.tile}")
     print(f"Suffix:       {args.suffix}")
     print(f"Format:       {args.format}")
     print()
 
     upsampler, face_enhancer, device = setup_model(args)
+
+    denoiser = None
+    if args.denoise:
+        from src.denoise import setup_denoiser
+
+        denoiser = setup_denoiser(device)
 
     pairs = resolve_paths(args)
     print(f"Found {len(pairs)} image(s) to process\n")
@@ -87,6 +99,11 @@ def main():
             img = cv2.imread(str(inp), cv2.IMREAD_UNCHANGED)
             if img is None:
                 raise ValueError(f"Failed to read image: {inp}")
+
+            if denoiser:
+                from src.denoise import denoise_image
+
+                img = denoise_image(*denoiser, img, device)
 
             h, w = img.shape[:2]
             print(f"[{i}/{len(pairs)}] {inp.name} ({w}x{h}) -> ", end="", flush=True)

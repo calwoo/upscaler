@@ -28,7 +28,7 @@ New module with two functions:
 
 Change `setup_model()` to return `(upsampler, face_enhancer, device)` so the denoiser can share the same device. Currently `device` is a local variable inside `setup_model`.
 
-### Step 3: Modify `upscale.py` — add `--denoise` flag and integrate
+### Step 3: Modify `upscale.py` — add `--denoise` flag and integrate ✅
 
 - Add `--denoise` argparse flag (`store_true`, help: "Enable Swin2SR denoising before upscaling")
 - After `setup_model()`, conditionally call `setup_denoiser(device)`
