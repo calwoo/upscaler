@@ -39,12 +39,15 @@ def setup_model(args):
         netscale = 4
         url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth"
 
-    use_half = torch.cuda.is_available()
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if args.gpu_id is not None:
-        device = torch.device(
-            f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu"
-        )
+    if torch.cuda.is_available():
+        device = torch.device(f"cuda:{args.gpu_id}" if args.gpu_id is not None else "cuda")
+        use_half = True
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+        use_half = False
+    else:
+        device = torch.device("cpu")
+        use_half = False
 
     cached_weights = fetch_model_weights(url)
     upsampler = RealESRGANer(
