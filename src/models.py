@@ -7,6 +7,10 @@ from .utils import fetch_model_weights
 
 def setup_model(args):
     """Initialize Real-ESRGAN (and optionally GFPGAN) based on CLI args."""
+
+    netscale = None
+    model = None
+    url = None
     if args.model == "general" and args.scale == 4:
         model_name = "RealESRGAN_x4plus"
         model = RRDBNet(
@@ -38,6 +42,9 @@ def setup_model(args):
         )
         netscale = 4
         url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth"
+
+    if not netscale or not model or not url:
+        raise ValueError("values aren't populated")
 
     if torch.cuda.is_available():
         device = torch.device(f"cuda:{args.gpu_id}" if args.gpu_id is not None else "cuda")

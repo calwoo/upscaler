@@ -4,4 +4,5 @@ __pycache__/
 .pytest_cache/
 test_inputs/
 outputs/
+outputs_denoised/
 weights/

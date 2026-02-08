@@ -7,9 +7,9 @@ cd "$SCRIPT_DIR"
 
 mkdir -p outputs outputs_denoised
 
-echo "=== Running upscaler (2x, no denoising) on test_inputs/ ==="
-uv run python upscale.py --scale 2 -i test_inputs -o outputs "$@"
-echo "=== Done. Results saved to outputs/ ==="
+# echo "=== Running upscaler (2x, no denoising) on test_inputs/ ==="
+# uv run python upscale.py --scale 2 -i test_inputs -o outputs "$@"
+# echo "=== Done. Results saved to outputs/ ==="
 
 echo ""
 echo "=== Running upscaler (2x, WITH denoising) on test_inputs/ ==="
