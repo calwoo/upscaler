@@ -1,21 +1,81 @@
-import os
-import urllib
+from basicsr.archs.rrdbnet_arch import RRDBNet
+from realesrgan import RealESRGANer
+import torch
 
-WEIGHTS_DIR: str = "weights"
+from .utils import fetch_model_weights
 
 
-def fetch_model_weights(url: str):
-    filename = os.path.basename(url)
-    weights_dir = os.path.join(os.path.dirname(__file__), WEIGHTS_DIR)
-    weights_filepath = os.path.join(weights_dir, filename)
+def setup_model(args):
+    """Initialize Real-ESRGAN (and optionally GFPGAN) based on CLI args."""
+    if args.model == "general" and args.scale == 4:
+        model_name = "RealESRGAN_x4plus"
+        model = RRDBNet(
+            num_in_ch=3,
+            num_out_ch=3,
+            num_feat=64,
+            num_block=23,
+            num_grow_ch=32,
+            scale=4,
+        )
+        netscale = 4
+        url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
+    elif args.model == "general" and args.scale == 2:
+        model_name = "RealESRGAN_x2plus"
+        model = RRDBNet(
+            num_in_ch=3,
+            num_out_ch=3,
+            num_feat=64,
+            num_block=23,
+            num_grow_ch=32,
+            scale=2,
+        )
+        netscale = 2
+        url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth"
+    elif args.model == "anime":
+        model_name = "RealESRGAN_x4plus_anime_6B"
+        model = RRDBNet(
+            num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4
+        )
+        netscale = 4
+        url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth"
 
-    if not os.path.exists(weights_dir):
-        os.mkdir(weights_dir)
+    use_half = torch.cuda.is_available()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if args.gpu_id is not None:
+        device = torch.device(
+            f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu"
+        )
 
-    # download weights
-    if not os.path.exists(weights_filepath):
-        print(f"Downloading weights to {weights_filepath}...")
-        urllib.request.urlretrieve(url, weights_filepath)
-        print("Download complete.")
+    cached_weights = fetch_model_weights(url)
+    upsampler = RealESRGANer(
+        scale=netscale,
+        model_path=cached_weights,
+        model=model,
+        tile=args.tile,
+        tile_pad=10,
+        pre_pad=0,
+        half=use_half,
+        device=device,
+    )
 
-    return weights_filepath
+    face_enhancer = None
+    if args.face_enhance:
+        from gfpgan import GFPGANer
+
+        weights_url = "https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth"
+        cached_weights = fetch_model_weights(weights_url)
+        face_enhancer = GFPGANer(
+            model_path=cached_weights,
+            upscale=args.scale,
+            arch="clean",
+            channel_multiplier=2,
+            bg_upsampler=upsampler,
+        )
+
+    print(f"Model:  {model_name}")
+    print(f"Device: {device}")
+    print(f"Half:   {use_half}")
+    if face_enhancer:
+        print("Face enhancement: enabled")
+
+    return upsampler, face_enhancer
