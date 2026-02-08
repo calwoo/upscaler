@@ -48,7 +48,7 @@ Add `transformers` (for model loading) and `huggingface_hub` (transitive dep, bu
 
 - Update `docs/usage.md` with `--denoise` flag documentation
 
-### Step 7: Install new deps and verify
+### Step 7: Install new deps and verify ✅
 
 - `uv pip install transformers huggingface_hub` in the existing venv
 - Run `pytest` to verify all tests pass
