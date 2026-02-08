@@ -81,4 +81,4 @@ def setup_model(args):
     if face_enhancer:
         print("Face enhancement: enabled")
 
-    return upsampler, face_enhancer
+    return upsampler, face_enhancer, device

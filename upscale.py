@@ -75,7 +75,7 @@ def main():
     print(f"Format:       {args.format}")
     print()
 
-    upsampler, face_enhancer = setup_model(args)
+    upsampler, face_enhancer, device = setup_model(args)
 
     pairs = resolve_paths(args)
     print(f"Found {len(pairs)} image(s) to process\n")
