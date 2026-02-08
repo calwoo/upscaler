@@ -12,44 +12,48 @@ from realesrgan import RealESRGANer
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Upscale images using Real-ESRGAN"
+    parser = argparse.ArgumentParser(description="Upscale images using Real-ESRGAN")
+    parser.add_argument(
+        "-i", "--input", required=True, help="Path to an image file or folder of images"
     )
     parser.add_argument(
-        "-i", "--input", required=True,
-        help="Path to an image file or folder of images"
+        "-o", "--output", required=True, help="Path for output image or output folder"
     )
     parser.add_argument(
-        "-o", "--output", required=True,
-        help="Path for output image or output folder"
+        "--scale",
+        type=int,
+        default=4,
+        choices=[2, 4],
+        help="Upscale factor: 2 or 4 (default: 4)",
     )
     parser.add_argument(
-        "--scale", type=int, default=4, choices=[2, 4],
-        help="Upscale factor: 2 or 4 (default: 4)"
+        "--model",
+        default="general",
+        choices=["general", "anime"],
+        help="Model choice: general or anime (default: general)",
     )
     parser.add_argument(
-        "--model", default="general", choices=["general", "anime"],
-        help="Model choice: general or anime (default: general)"
+        "--face-enhance", action="store_true", help="Enable GFPGAN face enhancement"
     )
     parser.add_argument(
-        "--face-enhance", action="store_true",
-        help="Enable GFPGAN face enhancement"
+        "--tile",
+        type=int,
+        default=0,
+        help="Tile size for large images, 0 = no tiling (default: 0)",
     )
     parser.add_argument(
-        "--tile", type=int, default=0,
-        help="Tile size for large images, 0 = no tiling (default: 0)"
+        "--gpu-id", type=int, default=None, help="GPU device ID, omit for auto-detect"
     )
     parser.add_argument(
-        "--gpu-id", type=int, default=None,
-        help="GPU device ID, omit for auto-detect"
+        "--suffix",
+        default="_upscaled",
+        help="Suffix appended to output filenames (default: _upscaled)",
     )
     parser.add_argument(
-        "--suffix", default="_upscaled",
-        help="Suffix appended to output filenames (default: _upscaled)"
-    )
-    parser.add_argument(
-        "--format", default="auto", choices=["auto", "png", "jpg"],
-        help="Output format: auto, png, or jpg (default: auto)"
+        "--format",
+        default="auto",
+        choices=["auto", "png", "jpg"],
+        help="Output format: auto, png, or jpg (default: auto)",
     )
     return parser.parse_args()
 
@@ -58,24 +62,42 @@ def setup_model(args):
     """Initialize Real-ESRGAN (and optionally GFPGAN) based on CLI args."""
     if args.model == "general" and args.scale == 4:
         model_name = "RealESRGAN_x4plus"
-        model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=4)
+        model = RRDBNet(
+            num_in_ch=3,
+            num_out_ch=3,
+            num_feat=64,
+            num_block=23,
+            num_grow_ch=32,
+            scale=4,
+        )
         netscale = 4
         url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.1.0/RealESRGAN_x4plus.pth"
     elif args.model == "general" and args.scale == 2:
         model_name = "RealESRGAN_x2plus"
-        model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=23, num_grow_ch=32, scale=2)
+        model = RRDBNet(
+            num_in_ch=3,
+            num_out_ch=3,
+            num_feat=64,
+            num_block=23,
+            num_grow_ch=32,
+            scale=2,
+        )
         netscale = 2
         url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.1/RealESRGAN_x2plus.pth"
     elif args.model == "anime":
         model_name = "RealESRGAN_x4plus_anime_6B"
-        model = RRDBNet(num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4)
+        model = RRDBNet(
+            num_in_ch=3, num_out_ch=3, num_feat=64, num_block=6, num_grow_ch=32, scale=4
+        )
         netscale = 4
         url = "https://github.com/xinntao/Real-ESRGAN/releases/download/v0.2.2.4/RealESRGAN_x4plus_anime_6B.pth"
 
     use_half = torch.cuda.is_available()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if args.gpu_id is not None:
-        device = torch.device(f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu")
+        device = torch.device(
+            f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu"
+        )
 
     upsampler = RealESRGANer(
         scale=netscale,
@@ -91,6 +113,7 @@ def setup_model(args):
     face_enhancer = None
     if args.face_enhance:
         from gfpgan import GFPGANer
+
         face_enhancer = GFPGANer(
             model_path="https://github.com/TencentARC/GFPGAN/releases/download/v1.3.0/GFPGANv1.3.pth",
             upscale=args.scale,
@@ -188,7 +211,10 @@ def main():
 
             if face_enhancer:
                 _, _, output = face_enhancer.enhance(
-                    img, has_aligned=False, only_center_face=False, paste_back=True,
+                    img,
+                    has_aligned=False,
+                    only_center_face=False,
+                    paste_back=True,
                 )
             else:
                 output, _ = upsampler.enhance(img, outscale=args.scale)

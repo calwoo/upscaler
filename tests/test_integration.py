@@ -43,7 +43,9 @@ class TestSingleImage4x:
         make_test_image(input_img, 64, 64)
 
         result = run_cli("-i", str(input_img), "-o", str(output_img), "--scale", "4")
-        assert result.returncode == 0, f"stderr: {result.stderr}\nstdout: {result.stdout}"
+        assert (
+            result.returncode == 0
+        ), f"stderr: {result.stderr}\nstdout: {result.stdout}"
         assert output_img.exists(), "Output image was not created"
 
         img = cv2.imread(str(output_img))
@@ -60,7 +62,9 @@ class TestSingleImage2x:
         make_test_image(input_img, 64, 64)
 
         result = run_cli("-i", str(input_img), "-o", str(output_img), "--scale", "2")
-        assert result.returncode == 0, f"stderr: {result.stderr}\nstdout: {result.stdout}"
+        assert (
+            result.returncode == 0
+        ), f"stderr: {result.stderr}\nstdout: {result.stdout}"
         assert output_img.exists()
 
         img = cv2.imread(str(output_img))
@@ -80,7 +84,9 @@ class TestFolderBatch:
             make_test_image(input_dir / name, 32, 32)
 
         result = run_cli("-i", str(input_dir), "-o", str(output_dir), "--scale", "4")
-        assert result.returncode == 0, f"stderr: {result.stderr}\nstdout: {result.stdout}"
+        assert (
+            result.returncode == 0
+        ), f"stderr: {result.stderr}\nstdout: {result.stdout}"
         assert output_dir.exists()
 
         output_files = sorted(f.name for f in output_dir.iterdir())
@@ -96,10 +102,18 @@ class TestOutputFormat:
         make_test_image(input_img, 32, 32)
 
         result = run_cli(
-            "-i", str(input_img), "-o", str(output_img),
-            "--scale", "4", "--format", "jpg",
+            "-i",
+            str(input_img),
+            "-o",
+            str(output_img),
+            "--scale",
+            "4",
+            "--format",
+            "jpg",
         )
-        assert result.returncode == 0, f"stderr: {result.stderr}\nstdout: {result.stdout}"
+        assert (
+            result.returncode == 0
+        ), f"stderr: {result.stderr}\nstdout: {result.stdout}"
         # Check that a .jpg file was created
         jpg_files = list(tmp_path.glob("*.jpg"))
         assert len(jpg_files) >= 1, "No .jpg output file found"
@@ -115,13 +129,22 @@ class TestSuffix:
         make_test_image(input_dir / "photo.png", 32, 32)
 
         result = run_cli(
-            "-i", str(input_dir), "-o", str(output_dir),
-            "--scale", "4", "--suffix", "_4x",
+            "-i",
+            str(input_dir),
+            "-o",
+            str(output_dir),
+            "--scale",
+            "4",
+            "--suffix",
+            "_4x",
         )
-        assert result.returncode == 0, f"stderr: {result.stderr}\nstdout: {result.stdout}"
+        assert (
+            result.returncode == 0
+        ), f"stderr: {result.stderr}\nstdout: {result.stdout}"
         output_files = list(output_dir.iterdir())
-        assert any("_4x" in f.name for f in output_files), \
-            f"No file with '_4x' suffix found: {[f.name for f in output_files]}"
+        assert any(
+            "_4x" in f.name for f in output_files
+        ), f"No file with '_4x' suffix found: {[f.name for f in output_files]}"
 
 
 class TestFaceEnhancement:
@@ -133,10 +156,17 @@ class TestFaceEnhancement:
         make_test_image(input_img, 64, 64)
 
         result = run_cli(
-            "-i", str(input_img), "-o", str(output_img),
-            "--scale", "4", "--face-enhance",
+            "-i",
+            str(input_img),
+            "-o",
+            str(output_img),
+            "--scale",
+            "4",
+            "--face-enhance",
         )
-        assert result.returncode == 0, f"stderr: {result.stderr}\nstdout: {result.stdout}"
+        assert (
+            result.returncode == 0
+        ), f"stderr: {result.stderr}\nstdout: {result.stdout}"
         assert output_img.exists()
 
 
@@ -157,5 +187,9 @@ class TestErrorHandling:
 
         result = run_cli("-i", str(input_dir), "-o", str(output_dir), "--scale", "4")
         # Should not crash — exits 0 and processes the good image
-        assert result.returncode == 0, f"stderr: {result.stderr}\nstdout: {result.stdout}"
-        assert (output_dir / "good_upscaled.png").exists() or len(list(output_dir.iterdir())) >= 1
+        assert (
+            result.returncode == 0
+        ), f"stderr: {result.stderr}\nstdout: {result.stdout}"
+        assert (output_dir / "good_upscaled.png").exists() or len(
+            list(output_dir.iterdir())
+        ) >= 1

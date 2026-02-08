@@ -27,8 +27,15 @@ class TestHelpOutput:
     def test_help_lists_all_arguments(self):
         result = run_cli("--help")
         for flag in [
-            "--input", "--output", "--scale", "--model",
-            "--face-enhance", "--tile", "--gpu-id", "--suffix", "--format",
+            "--input",
+            "--output",
+            "--scale",
+            "--model",
+            "--face-enhance",
+            "--tile",
+            "--gpu-id",
+            "--suffix",
+            "--format",
         ]:
             assert flag in result.stdout, f"Missing {flag} in --help output"
 
@@ -95,6 +102,8 @@ class TestFormatValidation:
 
 class TestInputPathValidation:
     def test_nonexistent_input_exits_with_error(self):
-        result = run_cli("-i", "/tmp/nonexistent_upscaler_test.png", "-o", "/tmp/out.png")
+        result = run_cli(
+            "-i", "/tmp/nonexistent_upscaler_test.png", "-o", "/tmp/out.png"
+        )
         assert result.returncode != 0
         assert "does not exist" in result.stdout.lower()
