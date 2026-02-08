@@ -8,4 +8,6 @@ torch
 torchvision
 numpy
 tqdm
+transformers
+huggingface_hub
 pytest

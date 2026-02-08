@@ -35,7 +35,7 @@ Change `setup_model()` to return `(upsampler, face_enhancer, device)` so the den
 - In the processing loop, after `cv2.imread` and before SR, call `denoise_image()` if enabled
 - Print denoise status in the header info block
 
-### Step 4: Update `requirements.txt`
+### Step 4: Update `requirements.txt` ✅
 
 Add `transformers` (for model loading) and `huggingface_hub` (transitive dep, but explicit is better).
 
