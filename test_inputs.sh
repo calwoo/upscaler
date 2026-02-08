@@ -8,5 +8,5 @@ cd "$SCRIPT_DIR"
 mkdir -p outputs
 
 echo "=== Running upscaler on test_inputs/ ==="
-uv run python upscale.py -i test_inputs -o outputs "$@"
+uv run python upscale.py --scale 2 -i test_inputs -o outputs "$@"
 echo "=== Done. Results saved to outputs/ ==="
